@@ -2775,6 +2775,36 @@ class Superset(BaseSupersetView):  # pylint: disable=too-many-public-methods
             ),
         )
 
+     @event_logger.log_this
+    @expose("/segmentation/")
+    def welcome(self) -> FlaskResponse:
+        """Personalized welcome page"""
+        if not g.user or not g.user.get_id():
+            if conf.get("PUBLIC_ROLE_LIKE_GAMMA", False) or conf["PUBLIC_ROLE_LIKE"]:
+                return self.render_template("superset/public_welcome.html")
+            return redirect(appbuilder.get_url_for_login)
+
+        welcome_dashboard_id = (
+            db.session.query(UserAttribute.welcome_dashboard_id)
+            .filter_by(user_id=g.user.get_id())
+            .scalar()
+        )
+        if welcome_dashboard_id:
+            return self.dashboard(dashboard_id_or_slug=str(welcome_dashboard_id))
+
+        payload = {
+            "user": bootstrap_user_data(g.user, include_perms=True),
+            "common": common_bootstrap_payload(),
+        }
+
+        return self.render_template(
+            "superset/segmentation.html",
+            entry="spa",
+            bootstrap_data=json.dumps(
+                payload, default=utils.pessimistic_json_iso_dttm_ser
+            ),
+        )
+
     @has_access
     @event_logger.log_this
     @expose("/profile/<username>/")

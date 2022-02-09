@@ -94,6 +94,12 @@ const SavedQueryList = lazy(
       /* webpackChunkName: "SavedQueryList" */ 'src/views/CRUD/data/savedquery/SavedQueryList'
     ),
 );
+const Segmentation = lazy(
+  () =>
+    import(
+      'src/views/segmentation/components/segmentation-landing/SegmentationLanding'
+    ),
+);
 
 type Routes = {
   path: string;
@@ -168,6 +174,10 @@ export const routes: Routes = [
     props: {
       isReportEnabled: true,
     },
+  },
+  {
+    path: '/segmentaton/',
+    Component: Segmentation,
   },
 ];
 
